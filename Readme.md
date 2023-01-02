@@ -34,10 +34,10 @@ This API allows users to manage their transactions and track their expenses with
 ## Stats of the user
 here positive means the user is will get money and negative means the user will give money.
 - `GET` `/api/get_traninfo`: Returns spitwise stats of the authenticated user.
- - `net`: Total amount on the user
- - `receiving_amount`: Total amount the user will receive from other users.
- - `paying_amount`: Total amount the user will pay to other users.
- - `friend_dairy`: A dictionary where the key is the friend's `ID` and the value is the amount the user will pay to the friend.
+  - `net`: Total amount on the user
+  - `receiving_amount`: Total amount the user will receive from other users.
+  - `paying_amount`: Total amount the user will pay to other users.
+  - `friend_dairy`: A dictionary where the key is the friend's `ID` and the value is the amount the user will pay to the friend.
 
 ## Data storage
 This API uses Django's built-in ORM to store the data in an SQLite database.
@@ -86,8 +86,8 @@ Here is an example of creating a new transaction:
 
 To install this API, follow these steps:
 
-1. Clone this repository.
-2. Create a virtual environment and activate it.
+1. Clone this repository with `git clone https://github.com/Vaishnavi-N-08/Money-Tracker-Django-Rest-API.git`.
+2. Create a virtual environment and activate it (optional step).
 3. Install the requirements using `pip install -r requirements.txt`.
 4. Run the migrations using `python manage.py makemigrations` and `python manage.py migrate.
 5. Run the server using `python manage.py runserver`.
