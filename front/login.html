@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+</head>
+<body>
+    <form>
+        <input type="text" name="username" value="admin" placeholder="Username" required>
+        <input type="password" name="password" value="1234" placeholder="Password" required>
+        <input type="submit" value="Login">
+    </form>
+    <script>
+        const form = document.querySelector('form');
+        form.addEventListener('submit',async (e) => {
+            e.preventDefault();
+            const data = new FormData(form);
+            const username = data.get('username');
+            const password = data.get('password');
+            const body = {
+                "username": username,
+                "password": password
+            }
+
+            response = await fetch('http://localhost:8000/api/token/', {
+                method: 'POST',
+                mode: 'cors',
+                credentials: 'same-origin',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+
+            // get the access token from the response
+            const {access,refresh} = await response.json();
+            console.log(access);
+            // save this access token in cookies
+            document.cookie = `access_token=${access}`;
+        })
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <form>
+        <input type="text" id = "username" name="username" placeholder="Username">
+        <input type="email" id="email" name="email" placeholder="Email">
+        <input type="password" id ="password" name="password" placeholder="Password">
+        <input type="submit" value="Register">
+    </form>
+    <script>
+        const form = document.querySelector('form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = new FormData(form);
+            const username = data.get('username');
+            const email = data.get('email');
+            const password = data.get('password');
+            const body = {username, email, password};
+            res = await fetch('http://127.0.0.1:8000/api/register/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            })
+            // user_info = await res.json()
+            // console.log(user_info);
+        })
+
+            
+    </script>
+
+</body>
+</html>
