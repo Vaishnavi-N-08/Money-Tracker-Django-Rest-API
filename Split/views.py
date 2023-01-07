@@ -5,6 +5,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from Split.models import Transaction
 from .serializers import RegisterSerializer, TransactionSerializer
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 User = get_user_model()
 
@@ -69,27 +70,22 @@ class LogoutView(APIView):
         return response
 
 # get all user
-# class Get_UsersView(APIView):
-#     def get(self,request):
-#         users = User.objects.all()
-#         serializer = RegisterSerializer(users,many=True)
-#         return Response(serializer.data)
+class Get_UsersView(APIView):
+    def get(self,request):
+        users = User.objects.all()
+        serializer = RegisterSerializer(users,many=True)
+        return Response(serializer.data)
 
 
 class Add_TransactionView(APIView):
     def post(self,request):
-        token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated')
-        try:
-            payload = jwt.decode(token,'secret',algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated')
-
+        jwt = JWTAuthentication()
+        user,token = jwt.authenticate(request)
+        print(user)
+        print(token)
         serializer_transaction = TransactionSerializer(data=request.data)
         serializer_transaction.is_valid(raise_exception=True)
-        serializer_transaction.save(paid_by=User.objects.filter(id=payload['id']).first()) 
+        serializer_transaction.save(paid_by=user) 
 
         return Response(serializer_transaction.data)
 
