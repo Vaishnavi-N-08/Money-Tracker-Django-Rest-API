@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="./transaction.css">
+    <title>Add Transaction</title>
+</head>
+
+<body>
+    <div class="transaction-div">
+        <h4>Add transaction Form</h4>
+        <form id="add-form" action="/add_transaction" method="POST">
+            <div class="row align-items-start">
+                <div class="col form-group">
+                    <label for="exampleInputEmail1">Amount</label>
+                    <input type="text" name="amount" placeholder="Amount" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="exampleInputUsername">Title</label>
+                    <input type="text" name="title" placeholder="Title" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="select-split">Slect Split between user</label>
+                    <select id="split-between" name="split_between" class="form-control" id="select-split"
+                        multiple></select>
+                </div>
+            </div>
+            <button type="submit" style="margin: 8px;"
+                class="btn btn-primary d-grid gap-2 col-6 mx-auto">Submit</button>
+        </form>
+    </div>
+    <div id="trans-info">
+    </div>
+    <div id="transaction-box">
+    </div>
+
+</body>
+
+
+
+<!-- <form id="add-form" action="/add_transaction" method="POST">
+        <input type="text" name="amount" placeholder="Amount">
+        <input type="text" name="title" placeholder="Title">
+        <select id="split-between" name="split_between" multiple>
+        <input type="submit" value="Add Transaction">
+    </form>
+    <div id="transaction-box">
+        <table id="transactions-table">
+        </table>
+    </div> -->
+<script>
+    // steps
+    // get all the users
+    // get all transactions
+    // replace all the users in transaction.splitbetween with their names
+    // display all the transactions
+    // create an async function to get all the users
+
+    function getCookie(cname) {
+        let name = cname + "=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let ca = decodedCookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+
+    all_users = {};
+    function getUsers() {
+        // Make a GET request to the API endpoint
+        fetch('http://localhost:8000/api/get_users',
+            {
+                method: 'GET',
+                mode: 'cors',
+                credentials: 'same-origin',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${getCookie('access_token')}`
+                }
+            }
+        )
+            .then(response => {
+                if (response.status == 401) {
+                    window.location.href = 'http://127.0.0.1:5500/front/login.html';
+                }
+                return response.json();
+            }) // Parse the response as JSON
+            .then(users => {
+
+                // Get the select element
+                const select = document.querySelector('#split-between');
+
+                // Add an option element for each user to the select element
+                users.forEach(user => {
+                    option = document.createElement('option');
+                    option.value = user.id;
+                    option.text = user.username;
+                    select.add(option);
+                    // add all user to all_users with their id as key
+                    all_users[user.id] = user.username;
+                });
+            });
+    }
+
+
+
+    // create an async function to get all the transactions of the authenticated user
+    all_transactions = {};
+    function getTransactions() {
+        // Make a GET request to the API endpoint
+        fetch('http://localhost:8000/api/get_transactions',
+            {
+                method: 'GET',
+                mode: 'cors',
+                credentials: 'same-origin',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${getCookie('access_token')}`
+                },
+            }
+        )
+            .then(response => response.json())
+            .then(transactions => {
+                // Create a table in the transaction-box div
+                const table = document.createElement('table');
+                table.id = 'transactions-table';
+                // add table and table-bordered to class
+                table.classList.add('table', 'table-bordered');
+                const transactionBox = document.querySelector('#transaction-box');
+                transactionBox.appendChild(table);
+                // create a header row for the table
+                const firstheadrow = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                const amountHeader = document.createElement('th');
+                amountHeader.scope = 'col';
+                amountHeader.textContent = 'Amount';
+                const titleHeader = document.createElement('th');
+                titleHeader.scope = 'col';
+                titleHeader.textContent = 'Title';
+                const splitBetweenHeader = document.createElement('th');
+                splitBetweenHeader.scope = 'col';
+                splitBetweenHeader.textContent = 'Split Between';
+                const actionsHeader = document.createElement('th');
+                actionsHeader.scope = 'col';
+                actionsHeader.textContent = 'Actions';
+                firstheadrow.appendChild(headerRow);
+                headerRow.appendChild(amountHeader);
+                headerRow.appendChild(titleHeader);
+                headerRow.appendChild(splitBetweenHeader);
+                headerRow.appendChild(actionsHeader);
+                table.appendChild(headerRow);
+                // create a table body elemnt
+                const tableBody = document.createElement('tbody');
+                table.appendChild(tableBody);
+
+                // Add a row for each transaction to the table
+                transactions.forEach(transaction => {
+                    // create a row for the transaction
+                    const row = document.createElement('tr');
+                    row.id = `transaction-${transaction.id}`;
+                    tableBody.appendChild(row);
+
+                    // create a cell for the amount
+                    const amountCell = document.createElement('td');
+                    amountCell.textContent = transaction.amount;
+                    row.appendChild(amountCell);
+
+                    // create a cell for the title
+                    const titleCell = document.createElement('td');
+                    titleCell.textContent = transaction.title;
+                    row.appendChild(titleCell);
+
+                    // create a cell for the split between
+                    const splitBetweenCell = document.createElement('td');
+                    // replace all the users in transaction.splitbetween with their names
+                    const splitBetween = transaction.split_between_users.map(user_id => all_users[user_id]);
+                    splitBetweenCell.textContent = splitBetween.join(', ');
+                    row.appendChild(splitBetweenCell);
+
+                    // create a cell for the actions
+                    const actionsCell = document.createElement('td');
+                    row.appendChild(actionsCell);
+                    // add all transactions to all_transactions with their id as key
+                    all_transactions[transaction.id] = transaction;
+                    // create a link to edit the transaction
+
+                    // create a button to delete the transaction with a data-id attribute add delete button class
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.setAttribute('data-id', transaction.id);
+                    deleteButton.classList.add('delete-button', 'btn', 'btn-danger');
+                    actionsCell.appendChild(deleteButton);
+
+                    // create a button to update the transaction with a data-id attribute add update button class
+                    const updateButton = document.createElement('button');
+                    updateButton.textContent = 'Update';
+                    updateButton.setAttribute('data-id', transaction.id);
+                    updateButton.classList.add('update-button', 'btn', 'btn-primary');
+                    actionsCell.appendChild(updateButton);
+                });
+
+            })
+    }
+
+
+    const form = document.querySelector('#add-form');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(form);
+        const amount = data.get('amount');
+        const title = data.get('title');
+        const split_between = data.getAll('split_between');
+        console.log(split_between);
+        const body = {
+            "amount": amount,
+            "title": title,
+            "split_between_users": split_between
+        }
+        // convert st to a javascript fetch request with Authorization header
+        response = await fetch('http://localhost:8000/api/add_transaction/', {
+            method: 'POST',
+            mode: 'cors',
+            credentials: 'same-origin',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${getCookie('access_token')}`
+            },
+            body: JSON.stringify(body)
+        });
+        kya_hai = await response.json();
+        console.log(kya_hai);
+    })
+
+    // add event listener delete-button class for click event
+    document.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('delete-button')) {
+            // get the id of the transaction to be deleted
+            const id = e.target.getAttribute('data-id');
+            // make a delete request to the API endpoint
+            response = await fetch(`http://localhost:8000/api/delete_transaction/${id}`, {
+                method: 'DELETE',
+                mode: 'cors',
+                credentials: 'same-origin',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${getCookie('access_token')}`
+                }
+            });
+            // remove the row from the table
+            const row = document.querySelector(`#transaction-${id}`);
+            row.remove();
+        }
+    });
+
+    // add event listener update-button class for click event
+    document.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('update-button')) {
+            // add a new form above the table for updation the amount title and spit between users
+            const id = e.target.getAttribute('data-id');
+            const transaction = all_transactions[id];
+            const updateForm = document.createElement('form');
+            updateForm.id = 'update-form';
+            const transactionBox = document.querySelector('#transaction-box');
+            transactionBox.insertBefore(updateForm, transactionBox.firstChild);
+            // create a input for amount
+            const amountInput = document.createElement('input');
+            amountInput.type = 'number';
+            amountInput.name = 'amount';
+            amountInput.value = transaction.amount;
+            updateForm.appendChild(amountInput);
+            // create a input for title
+            const titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.name = 'title';
+            titleInput.value = transaction.title;
+            updateForm.appendChild(titleInput);
+            // create a select for split between users
+            const splitBetweenSelect = document.createElement('select');
+            splitBetweenSelect.name = 'split_between';
+            splitBetweenSelect.multiple = true;
+            updateForm.appendChild(splitBetweenSelect);
+            // create a option for each user
+            selected_already = transaction.split_between_users
+            for (const user_id in all_users) {
+                const option = document.createElement('option');
+                option.value = user_id;
+                option.textContent = all_users[user_id];
+                // convert user id to number
+                converted_user_id = Number(user_id);
+                if (selected_already.includes(converted_user_id)) {
+                    console.log('selected');
+                    option.selected = true;
+                }
+                splitBetweenSelect.appendChild(option);
+            }
+            // create a submit button
+            const submitButton = document.createElement('button');
+            submitButton.type = 'submit';
+            submitButton.textContent = 'Update';
+            updateForm.appendChild(submitButton);
+            // add event listener to the form
+            updateForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const data = new FormData(updateForm);
+                const amount = data.get('amount');
+                const title = data.get('title');
+                const split_between = data.getAll('split_between');
+                console.log(split_between);
+                const body = {
+                    "amount": amount,
+                    "title": title,
+                    "split_between_users": split_between
+                }
+                // convert st to a javascript fetch request with Authorization header
+                response = await fetch(`http://localhost:8000/api/update_transaction/${id}/`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    credentials: 'same-origin',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${getCookie('access_token')}`
+                    },
+                    body: JSON.stringify(body)
+                });
+                kya_hai = await response.json();
+                console.log(kya_hai);
+                // update the transaction in the table
+                const row = document.querySelector(`#transaction-${id}`);
+                row.children[0].textContent = amount;
+                row.children[1].textContent = title;
+                row.children[2].textContent = split_between;
+
+                // remove the form
+                updateForm.remove();
+            })
+        }
+    });
+    // get transactionsinfo with all friends from the route http://localhost:8000/api/get_traninfo/
+    async function getTransactionsinfo() {
+        response = await fetch('http://localhost:8000/api/get_traninfo/', {
+            method: 'GET',
+            mode: 'cors',
+            credentials: 'same-origin',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${getCookie('access_token')}`
+            }
+        });
+        data = await response.json();
+        console.log(data);
+        sample_response = { net: 5106, receiving_amount: 5106, paying_amount: 0, friend_dairy: {1: 1719.6666666666667, 2: 1719.6666666666667, 3: 833.3333333333333, 4: 2053, 5: 500} }
+        // create a table to display net,receiving amount,paying amount,friend_dairy
+        const table = document.createElement('table');
+        table.id = 'traninfo-table';
+        const transactionBox = document.querySelector('#trans-info');
+        transactionBox.appendChild(table);
+        // create a row for net
+        const netRow = document.createElement('tr');
+        table.appendChild(netRow);
+        const netLabel = document.createElement('td');
+        netLabel.textContent = 'Net';
+        netRow.appendChild(netLabel);
+        const netValue = document.createElement('td');
+        netValue.textContent = data.net;
+        netRow.appendChild(netValue);
+        // create a row for receiving amount
+        const receivingAmountRow = document.createElement('tr');
+        table.appendChild(receivingAmountRow);
+        const receivingAmountLabel = document.createElement('td');
+        receivingAmountLabel.textContent = 'Receiving Amount';
+        receivingAmountRow.appendChild(receivingAmountLabel);
+        const receivingAmountValue = document.createElement('td');
+        receivingAmountValue.textContent = data.receiving_amount;
+        receivingAmountRow.appendChild(receivingAmountValue);
+        // create a row for paying amount
+        const payingAmountRow = document.createElement('tr');
+        table.appendChild(payingAmountRow);
+        const payingAmountLabel = document.createElement('td');
+        payingAmountLabel.textContent = 'Paying Amount';
+        payingAmountRow.appendChild(payingAmountLabel);
+        const payingAmountValue = document.createElement('td');
+        payingAmountValue.textContent = data.paying_amount;
+        payingAmountRow.appendChild(payingAmountValue);
+        // create a row for friend_dairy
+        const friendDairyRow = document.createElement('tr');
+        table.appendChild(friendDairyRow);
+        const friendDairyLabel = document.createElement('td');
+        friendDairyLabel.textContent = 'Friend Dairy';
+        friendDairyRow.appendChild(friendDairyLabel);
+        const friendDairyValue = document.createElement('td');
+        friendDairyRow.appendChild(friendDairyValue);
+        // create a table for friend_dairy
+        const friendDairyTable = document.createElement('table');
+        friendDairyTable.classList.add('table', 'table-bordered');
+        friendDairyValue.appendChild(friendDairyTable);
+        // create a friend dairy table with two header friend name and amount
+        const friendDairyTableHeader = document.createElement('thead');
+        friendDairyTable.appendChild(friendDairyTableHeader);
+        const friendDairyTableHeaderRow = document.createElement('tr');
+        friendDairyTableHeader.appendChild(friendDairyTableHeaderRow);
+        const friendDairyTableHeaderFriendName = document.createElement('th');
+        friendDairyTableHeaderFriendName.textContent = 'Friend Name';
+        friendDairyTableHeaderRow.appendChild(friendDairyTableHeaderFriendName);
+        const friendDairyTableHeaderAmount = document.createElement('th');
+        friendDairyTableHeaderAmount.textContent = 'Amount';
+        friendDairyTableHeaderRow.appendChild(friendDairyTableHeaderAmount);
+        // create a friend dairy table body
+        const friendDairyTableBody = document.createElement('tbody');
+        friendDairyTable.appendChild(friendDairyTableBody);
+        // create a row for each friend
+        for (const [key, value] of Object.entries(data.friend_dairy)) {
+            const friendDairyTableRow = document.createElement('tr');
+            friendDairyTableBody.appendChild(friendDairyTableRow);
+            const friendDairyTableFriendName = document.createElement('td');
+            friendDairyTableFriendName.textContent = all_users[key];
+            console
+            friendDairyTableRow.appendChild(friendDairyTableFriendName);
+            const friendDairyTableAmount = document.createElement('td');
+            friendDairyTableAmount.textContent = value;
+            friendDairyTableRow.appendChild(friendDairyTableAmount);
+        }
+
+
+    }
+    getUsers();
+    getTransactionsinfo();
+    getTransactions();
+</script>
+
+
+</body>
+
+</html>

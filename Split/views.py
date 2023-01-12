@@ -72,6 +72,8 @@ class LogoutView(APIView):
 # get all user
 class Get_UsersView(APIView):
     def get(self,request):
+        jwt = JWTAuthentication()
+        user,token = jwt.authenticate(request)
         users = User.objects.all()
         serializer = RegisterSerializer(users,many=True)
         return Response(serializer.data)
@@ -81,8 +83,8 @@ class Add_TransactionView(APIView):
     def post(self,request):
         jwt = JWTAuthentication()
         user,token = jwt.authenticate(request)
-        print(user)
-        print(token)
+        # if it gives user is unauthorised give the msg to the user on html page
+        
         serializer_transaction = TransactionSerializer(data=request.data)
         serializer_transaction.is_valid(raise_exception=True)
         serializer_transaction.save(paid_by=user) 
@@ -92,17 +94,12 @@ class Add_TransactionView(APIView):
 
 class Delete_TransactionView(APIView):
     def delete(self,request,id):
-        token = request.COOKIES.get('jwt')
-        if not token:
-            raise AuthenticationFailed('Unauthenticated')
-        try:
-            payload = jwt.decode(token,'secret',algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated')
+        jwt = JWTAuthentication()
+        user,token = jwt.authenticate(request)
         transaction = Transaction.objects.filter(id=id).first()
         if transaction is None:
             raise AuthenticationFailed('Transaction not found')
-        if transaction.paid_by.id != payload['id']:
+        if transaction.paid_by.id != user.id:
             raise AuthenticationFailed('You are not allowed to delete this transaction')
         transaction.delete()
         return Response('Transaction deleted successfully')
@@ -110,51 +107,41 @@ class Delete_TransactionView(APIView):
 
 class Update_TransactionView(APIView):
     def post(self,request,id):
-        token = request.COOKIES.get('jwt')
-        if not token:
-            raise AuthenticationFailed('Unauthenticated')
-        try:
-            payload = jwt.decode(token,'secret',algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated')
+        jwt = JWTAuthentication()
+        user,token = jwt.authenticate(request)
         transaction = Transaction.objects.filter(id=id).first()
         if transaction is None:
             raise AuthenticationFailed('Transaction not found')
-        if transaction.paid_by.id != payload['id']:
+        if transaction.paid_by.id != user.id:
             raise AuthenticationFailed('You are not allowed to update this transaction')
         serializer_transaction = TransactionSerializer(data=request.data)
         serializer_transaction.is_valid(raise_exception=True)
-        serializer_transaction.save()
+        # update the transaction with the new data 'amount','title','split_between_users'
+        transaction.amount = serializer_transaction.validated_data['amount']
+        transaction.title = serializer_transaction.validated_data['title']
+        transaction.split_between_users.set(serializer_transaction.validated_data['split_between_users'])
+        transaction.save()
 
+        # return the updated transaction
+        serializer_transaction = TransactionSerializer(transaction)
         return Response(serializer_transaction.data)
 
 
 class Get_TransactionsView(APIView):
     def get(self,request):
-        token = request.COOKIES.get('jwt')
-        if not token:
-            raise AuthenticationFailed('Unauthenticated')
-        try:
-            payload = jwt.decode(token,'secret',algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated')
-        transactions = Transaction.objects.filter(paid_by=payload['id'])
+        jwt = JWTAuthentication()
+        user,token = jwt.authenticate(request)
+        transactions = Transaction.objects.filter(paid_by=user)
         serializer = TransactionSerializer(transactions,many=True)
         return Response(serializer.data)
 
 
 class Get_TransactionInfoView(APIView):
     def get(self,request):
-        token = request.COOKIES.get('jwt')
+        jwt = JWTAuthentication()
+        user,token = jwt.authenticate(request)
 
-        if not token:
-            raise AuthenticationFailed('Unauthenticated')
-        try:
-            payload = jwt.decode(token,'secret',algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated')
-
-        user = User.objects.filter(id=payload['id']).first()
+        user = User.objects.filter(id=user.id).first()
         transactions_by_user = Transaction.objects.filter(paid_by=user)
         transactions_in_split_between_users = Transaction.objects.filter(split_between_users=user)
         net = 0

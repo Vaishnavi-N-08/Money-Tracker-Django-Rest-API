@@ -1,0 +1,24 @@
+.transaction-div{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-top: 5%;
+    padding: 20px;
+    align-items: center
+}
+.form-group{
+    padding: 5px;
+}
+.form-group label{
+    padding: 5px;
+}
+h4{
+    padding: 10px;
+    margin-bottom: 3%;
+    align-items: center;
+  }
+#transaction-box{
+    margin: 5%;
+    padding: 20px;
+}
