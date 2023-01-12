@@ -369,6 +369,7 @@
         sample_response = { net: 5106, receiving_amount: 5106, paying_amount: 0, friend_dairy: {1: 1719.6666666666667, 2: 1719.6666666666667, 3: 833.3333333333333, 4: 2053, 5: 500} }
         // create a table to display net,receiving amount,paying amount,friend_dairy
         const table = document.createElement('table');
+        table.classList.add('table', 'table-bordered');
         table.id = 'traninfo-table';
         const transactionBox = document.querySelector('#trans-info');
         transactionBox.appendChild(table);
@@ -431,7 +432,6 @@
             friendDairyTableBody.appendChild(friendDairyTableRow);
             const friendDairyTableFriendName = document.createElement('td');
             friendDairyTableFriendName.textContent = all_users[key];
-            console
             friendDairyTableRow.appendChild(friendDairyTableFriendName);
             const friendDairyTableAmount = document.createElement('td');
             friendDairyTableAmount.textContent = value;
@@ -440,7 +440,7 @@
 
 
     }
-    getUsers();
+    getUsers()
     getTransactionsinfo();
     getTransactions();
 </script>
