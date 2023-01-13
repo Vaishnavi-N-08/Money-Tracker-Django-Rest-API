@@ -53,7 +53,7 @@
                 "password": password
             }
 
-            response = await fetch('http://localhost:8000/api/token/', {
+            response = await fetch('http://cohesiveapi.pythonanywhere.com/api/token/', {
                 method: 'POST',
                 mode: 'cors',
                 credentials: 'same-origin',
@@ -68,7 +68,7 @@
             // write login successful in alert section
             document.querySelector('#alert-section').innerHTML = "Login Successful";
             // redirect to the transaction.html
-            window.location.href = "transaction.html";
+            window.location.href = "index.html";
             // save this access token in cookies
             document.cookie = `access_token=${access}`;
             document.cookie = `refresh_token=${refresh}`;

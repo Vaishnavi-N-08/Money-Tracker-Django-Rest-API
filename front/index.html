@@ -86,7 +86,7 @@
     all_transactions = {};
     function getUsers() {
         // Make a GET request to the API endpoint
-        fetch('http://localhost:8000/api/get_users',
+        fetch('http://cohesiveapi.pythonanywhere.com/api/get_users',
             {
                 method: 'GET',
                 mode: 'cors',
@@ -118,7 +118,7 @@
                 });
                 return all_users;
             }).then(all_users => {
-                fetch('http://localhost:8000/api/get_traninfo/', {
+                fetch('http://cohesiveapi.pythonanywhere.com/api/get_traninfo/', {
                     method: 'GET',
                     mode: 'cors',
                     credentials: 'same-origin',
@@ -173,7 +173,7 @@
                     transInfo.appendChild(ol);
 
                 }).then(() => {
-                    fetch('http://localhost:8000/api/get_transactions',
+                    fetch('http://cohesiveapi.pythonanywhere.com/api/get_transactions',
                         {
                             method: 'GET',
                             mode: 'cors',
@@ -282,7 +282,7 @@
             "split_between_users": split_between
         }
         // convert st to a javascript fetch request with Authorization header
-        response = await fetch('http://localhost:8000/api/add_transaction/', {
+        response = await fetch('http://cohesiveapi.pythonanywhere.com/api/add_transaction/', {
             method: 'POST',
             mode: 'cors',
             credentials: 'same-origin',
@@ -300,7 +300,7 @@
             // get the id of the transaction to be deleted
             const id = e.target.getAttribute('data-id');
             // make a delete request to the API endpoint
-            response = await fetch(`http://localhost:8000/api/delete_transaction/${id}`, {
+            response = await fetch(`http://cohesiveapi.pythonanywhere.com/api/delete_transaction/${id}`, {
                 method: 'DELETE',
                 mode: 'cors',
                 credentials: 'same-origin',
@@ -422,7 +422,7 @@
                     "split_between_users": split_between
                 }
                 // convert st to a javascript fetch request with Authorization header
-                response = await fetch(`http://localhost:8000/api/update_transaction/${id}/`, {
+                response = await fetch(`http://cohesiveapi.pythonanywhere.com/api/update_transaction/${id}/`, {
                     method: 'POST',
                     mode: 'cors',
                     credentials: 'same-origin',
