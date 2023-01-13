@@ -53,10 +53,21 @@
                 },
                 body: JSON.stringify(body)
             })
-            document.querySelector('#alert-section').innerHTML = "Registered Successfully";
 
-            // user_info = await res.json()
-            // console.log(user_info);
+            const resData = await res.json();
+            // status == 201 the show cucess
+            if(res.status == 201){
+                document.querySelector('#alert-section').innerHTML = "Registered Successfully";
+                document.querySelector('#alert-section').classList.add('text-center', 'text-success', 'fw-bold');
+                // redirect to login page
+                window.location.href = './login.html';
+            }
+            else{
+                document.querySelector('#alert-section').innerHTML = "Registered Failed Try Different Username and Mail";
+                document.querySelector('#alert-section').classList.add('text-center', 'text-danger', 'fw-bold');
+            }
+
+
         })
 
             

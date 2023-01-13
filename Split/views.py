@@ -14,7 +14,8 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        # send status code 201 for created
+        return Response(serializer.data,status=201)
 
 
 class LoginView(APIView):
@@ -59,14 +60,17 @@ class UserView(APIView):
         serializer = RegisterSerializer(user)
         return Response(serializer.data)
     
+
 class LogoutView(APIView):
     def post(self,request):
+        jwt = JWTAuthentication()
+        user,token = jwt.authenticate(request)
+        
         response = Response()
         response.delete_cookie('jwt')
-        response.data={
+        response.data = {
             'message':'success'
         }
-
         return response
 
 # get all user
@@ -74,7 +78,8 @@ class Get_UsersView(APIView):
     def get(self,request):
         jwt = JWTAuthentication()
         user,token = jwt.authenticate(request)
-        users = User.objects.all()
+        # get all the users except ther own user
+        users = User.objects.exclude(id=user.id)
         serializer = RegisterSerializer(users,many=True)
         return Response(serializer.data)
 

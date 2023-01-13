@@ -40,6 +40,8 @@
     
 
     <script>
+      // delete all the cookiies present
+      document.cookie = ""
         const form = document.querySelector('form');
         form.addEventListener('submit',async (e) => {
             e.preventDefault();
@@ -69,6 +71,7 @@
             window.location.href = "transaction.html";
             // save this access token in cookies
             document.cookie = `access_token=${access}`;
+            document.cookie = `refresh_token=${refresh}`;
         })
     </script>
     
