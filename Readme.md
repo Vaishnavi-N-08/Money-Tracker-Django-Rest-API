@@ -2,6 +2,16 @@
 
 This API allows users to manage their transactions and track their expenses with their friends. It provides the following functionality:
 
+## Frontend
+
+- `First you will be on index page. At backend it will check if the user is not authenticated it will redirect you to login page.`
+
+- `Now the main is the index page here only you can add,update and delete transaction`
+
+- `Also in the index page you will be able to see how money you have to pay to your friend and how much you are receiving from them`
+
+
+
 ## Endpoints
 
 ### Authentication Routes
@@ -91,6 +101,7 @@ To install this API, follow these steps:
 3. Install the requirements using `pip install -r requirements.txt`.
 4. Run the migrations using `python manage.py makemigrations` and `python manage.py migrate.
 5. Run the server using `python manage.py runserver`.
+6. Deployed application  : [Link](http://cohesiveapi.pythonanywhere.com/media/login.html)
 
 
 
