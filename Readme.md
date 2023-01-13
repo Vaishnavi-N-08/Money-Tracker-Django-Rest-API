@@ -2,15 +2,13 @@
 
 This API allows users to manage their transactions and track their expenses with their friends. It provides the following functionality:
 
-## Frontend
-
 ## Endpoints
 
 ### Authentication Routes
 - `POST` `/api/register/` : Register a new user with email, password, first_name, last_name
 - `POST` `/api/login/`: Login an existing user with email and password and send a token in response.cookie
 - `GET` `/api/user/`: Get the details of the logged in user
-
+- `POST` `/api/logout/`: Logout the logged in user
 
 ### Creating, updating, and deleting transactions
 1) Authentication is required to access these endpoints.
